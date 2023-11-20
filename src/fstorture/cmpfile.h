@@ -31,7 +31,9 @@ value is 1 on success, 0 on failure.
 /* ------------------------------------------------------------------------- */
 
 #include "basictypes.h"
+#ifndef __Fuchsia__
 #include <sys/acl.h>
+#endif
 
 #define THREADS 5
 
@@ -88,8 +90,10 @@ btbool	cmpfileSetMode(cmpfile_t *cmpfile, btbool writable);
 /* Changes the write protection mode of the file.
  */
 
+#ifndef __Fuchsia__
 btbool  cmpfileAcls_do();
 btbool  cmpfileAcls(cmpfile_t *cmpfile);
+#endif
 
 btbool	cmpfileStat(cmpfile_t *cmpfile, int noPerms);
 /* Compares write protection status and size of the "real" file and the

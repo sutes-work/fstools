@@ -29,10 +29,10 @@ int		random_int(int exclusive_range);
 real_t	random_gauss(real_t stdval, real_t maxRange);
 void	random_block(void *block, int len);
 void	random_name(char *name, int len, int prefix);
-const char * random_root();
+const char * random_root(void);
 void	random_path(char *path, int id, int running, const char *root);
 
-void	perr(int e, char *s, ...);
+void	perr(int e, const char *s, ...);
 void	cleanup(int sig);
 /* ------------------------------------------------------------------------- */
 

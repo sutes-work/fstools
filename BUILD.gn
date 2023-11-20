@@ -1,0 +1,20 @@
+import("//build/components.gni")
+
+executable("fstorture_bin") {
+  output_name = "fstorture"
+  sources = [
+    "src/fstorture/cmpdir.c",
+    "src/fstorture/cmpdir.h",
+    "src/fstorture/cmpfile.c",
+    "src/fstorture/cmpfile.h",
+    "src/fstorture/fileemu.c",
+    "src/fstorture/fileemu.h",
+    "src/fstorture/fstorture.c",
+    "src/fstorture/stdheaders.h",
+    "src/fstorture/util.h",
+  ]
+}
+
+fuchsia_shell_package("fstorture") {
+  deps = [ ":fstorture_bin" ]
+}

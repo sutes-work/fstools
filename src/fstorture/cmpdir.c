@@ -22,8 +22,10 @@
 #include "util.h"
 
 extern int trace;
-char *acl_perm_dir_n[] = { "list", "add_file", "search", "delete", "add_subdirectory", "delete_child", "readattr", "writeattr", "readextattr", "writeextattr", "readsecurity", "writesecurity", "chown" };
+#ifndef __Fuchsia__
+const char *acl_perm_dir_n[] = { "list", "add_file", "search", "delete", "add_subdirectory", "delete_child", "readattr", "writeattr", "readextattr", "writeextattr", "readsecurity", "writesecurity", "chown" };
 int acl_perm_t_dir_r[] = { ACL_LIST_DIRECTORY, ACL_ADD_FILE, ACL_SEARCH, ACL_DELETE, ACL_ADD_SUBDIRECTORY, ACL_DELETE_CHILD, ACL_READ_ATTRIBUTES, ACL_WRITE_ATTRIBUTES, ACL_READ_EXTATTRIBUTES, ACL_WRITE_EXTATTRIBUTES, ACL_READ_SECURITY, ACL_WRITE_SECURITY, ACL_CHANGE_OWNER };
+#endif
 char errstr[1024];
 
 /* ------------------------------------------------------------------------- */
@@ -35,7 +37,7 @@ static unsigned char	*blockWithPattern(int pattern, unsigned char block[BUF_SIZE
 int		i;
 	srand(pattern);	/* make reproducible random sequence */
 	for(i=0;i<BUF_SIZE;i++)
-		block[i] = rand() >> 8;
+          block[i] = (unsigned char)(rand() >> 8);
 	return block;
 }
 
@@ -48,7 +50,7 @@ unsigned char block[BUF_SIZE], buffer[BUF_SIZE];
 		perr(errno, "error seeking (read) in file %s in dir %s", dir->files[i].name, dir->name);
 		return 0;
 	}
-	fileLen = read(dir->files[i].fd, buffer, BUF_SIZE);
+	fileLen = (int)read(dir->files[i].fd, buffer, BUF_SIZE);
 	if(fileLen < 0){
 		perr(errno, "error reading file %s in dir %s", dir->files[i].name, dir->name);
 		return 0;
@@ -186,7 +188,7 @@ unsigned char block[BUF_SIZE];
 			dir->files[i].fd = 0;
 			dir->files[i].name[0] = 0;
 		}else{
-			if((len = write(dir->files[i].fd, blockWithPattern(dir->files[i].filePattern, block), BUF_SIZE)) != BUF_SIZE){
+                  if((len = (int)write(dir->files[i].fd, blockWithPattern(dir->files[i].filePattern, block), BUF_SIZE)) != BUF_SIZE){
 				perr(errno, "error writing file %s, wlen = %d", path, len);
 				rval = 0;
 			}

@@ -23,15 +23,17 @@
 #include "util.h"
 
 extern int trace;
+#ifndef __Fuchsia__
 char *acl_perm_t_file_n[] = { "read", "write", "execute", "delete", "append", "readattr", "writeattr", "readextattr", "writeextattr", "readsecurity", "writesecurity", "chown" };
 int acl_perm_t_file_r[] = { ACL_READ_DATA, ACL_WRITE_DATA, ACL_EXECUTE, ACL_DELETE, ACL_APPEND_DATA, ACL_READ_ATTRIBUTES, ACL_WRITE_ATTRIBUTES, ACL_READ_EXTATTRIBUTES, ACL_WRITE_EXTATTRIBUTES, ACL_READ_SECURITY, ACL_WRITE_SECURITY, ACL_CHANGE_OWNER };
 extern uuid_t *uuid;
 extern pthread_t thr[THREADS];
 extern pthread_mutex_t mutex_start;
 extern pthread_cond_t cond_start;
-char filename_shared[1024];
 int howmany = 0;
 int acl_err = 1;
+#endif
+char filename_shared[1024];
 
 
 /* ------------------------------------------------------------------------- */
@@ -148,8 +150,10 @@ btbool	cmpfileOpen(cmpfile_t *cmpfile, btbool writable, btbool nocache)
 		return 0;
 	}
 
+#ifndef __Fuchsia__
 	if (nocache) 
 		fcntl(cmpfile->fd, F_NOCACHE, 1);
+#endif
 	cmpfile->isOpen = 1;
 	return 1;
 }
@@ -181,7 +185,7 @@ int	wlen;
 		perr(errno, "error seeking (write) in file %s", cmpfile->name);
 		return 0;
 	}
-	wlen = write(cmpfile->fd, data, len);
+	wlen = (int)write(cmpfile->fd, data, len);
 	if(wlen != len){
 		perr(errno, "error writing file %s, wlen = %d", cmpfile->name, wlen);
 		return 0;
@@ -205,7 +209,7 @@ btbool	rval = 1;
 		perr(errno, "error seeking (read) in file %s", cmpfile->name);
 		rval = 0;
 	}else{
-		fileLen = read(cmpfile->fd, fileBuf, len);
+          fileLen = (int)read(cmpfile->fd, fileBuf, len);
 		if(fileLen < 0){
 			perr(errno, "error reading file %s", cmpfile->name);
 			rval = 0;
@@ -269,6 +273,8 @@ int rval = 0;
 }
 
 /* ------------------------------------------------------------------------- */
+
+#ifndef __Fuchsia__
 
 void *thr_start() { // here, we just wait for work == when howmany != 0
 	while (1) {
@@ -418,6 +424,8 @@ int cmpfileAcls2(cmpfile_t *cmpfile)
 	return 1;
 }
 
+#endif  // !defined(__Fuchsia__)
+
 /* ------------------------------------------------------------------------- */
 
 btbool	cmpfileStat(cmpfile_t *cmpfile, int noPerms)
@@ -444,12 +452,16 @@ btbool	cmpfileStat(cmpfile_t *cmpfile, int noPerms)
 			perr(0, "file %s %sstats with wrong size (%d instead of %d)\n", cmpfile->name, cmpfile->isOpen ? "f" : "",(int)buf.st_size, refSize);
 			return 0;
 		}
+#ifndef __Fuchsia__
 		if(((buf.st_mode & 0200) != 0) != isW){
 			if (!noPerms) {
 				perr(0, "file %s %sstats with wrong write protection status (0%o)\n", cmpfile->name, cmpfile->isOpen ? "f" : "", buf.st_mode);
 				return 0;
 			}
 		}
+#else
+                (void)isW;
+#endif
 	}
 	return 1;
 }

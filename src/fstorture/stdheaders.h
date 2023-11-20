@@ -27,12 +27,15 @@ This header includes all system headers that are needed.
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#ifndef __Fuchsia__
 #include <membership.h>
+#endif
 #include <pthread.h>
 #include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
